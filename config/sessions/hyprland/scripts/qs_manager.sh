@@ -79,12 +79,24 @@ handle_network_prep() {
 }
 
 # -----------------------------------------------------------------------------
-# ENSURE MASTER WINDOW IS ALIVE
+# ENSURE MASTER WINDOW IS ALIVE (ZOMBIE WATCHDOG)
 # -----------------------------------------------------------------------------
-if ! pgrep -f "quickshell.*Main\.qml" > /dev/null; then
+QS_PID=$(pgrep -f "quickshell.*Main\.qml")
+# Check if Hyprland actually sees the window surface
+WIN_EXISTS=$(hyprctl clients -j | grep "qs-master")
+
+if [[ -z "$QS_PID" ]] || [[ -z "$WIN_EXISTS" ]]; then
+    # If the process is alive but the window is dead, kill the zombie
+    if [[ -n "$QS_PID" ]]; then
+        kill -9 $QS_PID 2>/dev/null
+    fi
+    
+    # Boot a fresh master QML window safely
     quickshell -p "$QS_DIR/Main.qml" >/dev/null 2>&1 &
     disown
-    sleep 0.5
+    
+    # Give Wayland a moment to map the new surface
+    sleep 0.6 
 fi
 
 # -----------------------------------------------------------------------------

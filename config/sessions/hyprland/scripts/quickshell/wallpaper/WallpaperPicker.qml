@@ -23,10 +23,11 @@ Item {
     }
 
     function tryFocus() {
-        if (!initialFocusSet && view.count > targetWallIndex) {
+        if (!initialFocusSet && view.count > 0) {
+            initialFocusSet = true;
+            // Instantly snap the camera and selection to the target without animating
             view.currentIndex = targetWallIndex;
             view.positionViewAtIndex(targetWallIndex, ListView.Center);
-            initialFocusSet = true;
         }
     }
 
@@ -45,7 +46,6 @@ Item {
     readonly property int spacing: 0 
     readonly property real skewFactor: -0.35
 
-    // Bulletproof explicit keyboard navigation
     Shortcut { sequence: "Left"; onActivated: view.decrementCurrentIndex() }
     Shortcut { sequence: "Right"; onActivated: view.incrementCurrentIndex() }
     Shortcut { sequence: "Return"; onActivated: { if (view.currentItem) view.currentItem.pickWallpaper() } }
@@ -62,12 +62,18 @@ Item {
         orientation: ListView.Horizontal
         clip: false 
 
+        // Pre-load items off-screen so they don't block the thread as they enter the view
+        cacheBuffer: 2000
+
         highlightRangeMode: ListView.StrictlyEnforceRange
         preferredHighlightBegin: (width / 2) - (window.itemWidth / 2)
         preferredHighlightEnd: (width / 2) + (window.itemWidth / 2)
+        
+        // Reset back to standard speed for snappy manual keyboard navigation
         highlightMoveDuration: 300
 
         focus: true
+        
         onCountChanged: window.tryFocus()
 
         model: FolderListModel {
@@ -139,6 +145,9 @@ Item {
                     sourceSize: Qt.size(1, 1)
                     fillMode: Image.Stretch
                     visible: true 
+                    
+                    // Load from disk on a background thread to prevent UI freezing
+                    asynchronous: true
                 }
 
                 Item {
@@ -157,6 +166,9 @@ Item {
                         
                         fillMode: Image.PreserveAspectCrop
                         source: fileUrl
+                        
+                        // Load from disk on a background thread to prevent UI freezing
+                        asynchronous: true
 
                         transform: Matrix4x4 {
                             property real s: -window.skewFactor

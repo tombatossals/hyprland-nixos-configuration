@@ -17,6 +17,7 @@
          # "bash ${./scripts/usb.sh}"
 	 "gsettings set org.gnome.desktop.interface cursor-theme 'ArcMidnight-Cursors'"
     	 "gsettings set org.gnome.desktop.interface cursor-size 24"
+	 "quickshell -p /etc/nixos/config/sessions/hyprland/scripts/quickshell/Main.qml" 
       ];
    };
 }

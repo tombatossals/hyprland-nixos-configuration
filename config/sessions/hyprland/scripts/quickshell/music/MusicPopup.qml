@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Effects
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 
@@ -126,7 +127,7 @@ Item {
 
     Timer {
         id: playDebounceTimer
-        interval: 1500 // Gives the backend 1.5 seconds to catch up before accepting polled status
+        interval: 1500
         onTriggered: root.userToggledPlay = false
     }
 
@@ -152,7 +153,6 @@ Item {
                     if (outStr.length > 0) {
                         try { 
                             var newData = JSON.parse(outStr); 
-                            // Ignore polled status if we just toggled it
                             if (root.userToggledPlay) {
                                 newData.status = root.musicData.status; 
                             }
@@ -188,31 +188,98 @@ Item {
         Item {
             anchors.fill: parent
 
-            Rectangle {
+            Shape {
                 id: maskRectOuter
                 anchors.fill: parent
-                radius: 15 // Matches inner 12px + 3px margins
-                visible: false
+                visible: false // Hidden because MultiEffect will render it as a mask
                 layer.enabled: true
-            }
+                preferredRendererType: Shape.GeometryRenderer // Fixes lag by hardware accelerating the stroke
 
-            MultiEffect {
-                source: gradContainer
-                anchors.fill: parent
-                maskEnabled: true
-                maskSource: maskRectOuter
+                property real sw: 6
+                property real inset: sw / 2 
+                property real w: width
+                property real h: height
+                property real r: 15 - inset
+                
+                // Mathematical perimeter
+                property real straightLines: 2 * (w - 2 * inset - 2 * r) + 2 * (h - 2 * inset - 2 * r)
+                property real arcLines: 2 * Math.PI * r
+                property real perimeter: straightLines + arcLines
+
+                property real drawProgress: 0
+
+                NumberAnimation on drawProgress {
+                    id: chargeAnim
+                    from: 0
+                    to: maskRectOuter.perimeter
+                    duration: 1200 // The time it takes to "charge" the whole wick
+                    easing.type: Easing.OutCubic
+                }
+
+                Component.onCompleted: chargeAnim.start()
+
+                ShapePath {
+                    strokeWidth: maskRectOuter.sw
+                    strokeColor: "black" 
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
+
+                    // FIX: QML Shape dash patterns are measured in units of strokeWidth! 
+                    dashPattern: [maskRectOuter.perimeter / maskRectOuter.sw, maskRectOuter.perimeter / maskRectOuter.sw]
+                    dashOffset: (maskRectOuter.perimeter - maskRectOuter.drawProgress) / maskRectOuter.sw
+
+                    // Start exactly at Bottom-Left corner, going UP clockwise
+                    startX: maskRectOuter.inset
+                    startY: maskRectOuter.h - maskRectOuter.inset - maskRectOuter.r
+
+                    // 1. Up to top-left corner
+                    PathLine { x: maskRectOuter.inset; y: maskRectOuter.inset + maskRectOuter.r }
+                    // 2. Arc top-left
+                    PathArc { 
+                        x: maskRectOuter.inset + maskRectOuter.r; y: maskRectOuter.inset 
+                        radiusX: maskRectOuter.r; radiusY: maskRectOuter.r; direction: PathArc.Clockwise 
+                    }
+                    // 3. Right to top-right corner
+                    PathLine { x: maskRectOuter.w - maskRectOuter.inset - maskRectOuter.r; y: maskRectOuter.inset }
+                    // 4. Arc top-right
+                    PathArc { 
+                        x: maskRectOuter.w - maskRectOuter.inset; y: maskRectOuter.inset + maskRectOuter.r 
+                        radiusX: maskRectOuter.r; radiusY: maskRectOuter.r; direction: PathArc.Clockwise 
+                    }
+                    // 5. Down to bottom-right corner
+                    PathLine { x: maskRectOuter.w - maskRectOuter.inset; y: maskRectOuter.h - maskRectOuter.inset - maskRectOuter.r }
+                    // 6. Arc bottom-right
+                    PathArc { 
+                        x: maskRectOuter.w - maskRectOuter.inset - maskRectOuter.r; y: maskRectOuter.h - maskRectOuter.inset 
+                        radiusX: maskRectOuter.r; radiusY: maskRectOuter.r; direction: PathArc.Clockwise 
+                    }
+                    // 7. Left to bottom-left corner
+                    PathLine { x: maskRectOuter.inset + maskRectOuter.r; y: maskRectOuter.h - maskRectOuter.inset }
+                    // 8. Arc bottom-left to finish
+                    PathArc { 
+                        x: maskRectOuter.inset; y: maskRectOuter.h - maskRectOuter.inset - maskRectOuter.r 
+                        radiusX: maskRectOuter.r; radiusY: maskRectOuter.r; direction: PathArc.Clockwise 
+                    }
+                }
             }
 
             Item {
                 id: gradContainer
                 anchors.fill: parent
-                visible: false // Let MultiEffect render it
+                visible: false // Hidden for MultiEffect mapping
+                clip: true // FIX: Prevents the rotated gradient bounding box from bulging out the sides!
 
                 Rectangle {
-                    width: parent.width * 2
-                    height: parent.height * 2
+                    width: Math.max(parent.width, parent.height) * 2
+                    height: width
                     anchors.centerIn: parent
-                    rotation: gradAnim.angle
+                    
+                    NumberAnimation on rotation {
+                        from: 0; to: 360; duration: 5000
+                        loops: Animation.Infinite
+                        running: true
+                    }
+
                     gradient: Gradient {
                         GradientStop { 
                             position: 0.0; color: root.borderColors[0] 
@@ -231,13 +298,14 @@ Item {
                             Behavior on color { ColorAnimation { duration: 800; easing.type: Easing.InOutQuad } }
                         }
                     }
-                    NumberAnimation on rotation {
-                        id: gradAnim
-                        from: 0; to: 360; duration: 5000
-                        loops: Animation.Infinite
-                        running: true
-                    }
                 }
+            }
+
+            MultiEffect {
+                source: gradContainer
+                anchors.fill: parent
+                maskEnabled: true
+                maskSource: maskRectOuter
             }
         }
 

@@ -63,7 +63,7 @@
 	 "$mainMod, O, exec, obsidian"
          "$mainMod, RETURN, exec, $terminal"
 
-         "ALT, F4, killactive"
+         "ALT, F4, exec, bash -c 'if hyprctl activewindow | grep -q \"title: qs-master\"; then ~/.config/hypr/scripts/qs_manager.sh close; else hyprctl dispatch killactive; fi'"
 
 	 "$mainMod&CTRL, left, movewindow, l"
 	 "$mainMod&CTRL, right, movewindow, r"

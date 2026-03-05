@@ -418,18 +418,18 @@ Item {
                 anchors.fill: parent
                 anchors.bottomMargin: 80
                 z: 0 
-                opacity: (window.currentConn && window.showInfoView) ? 1.0 : 0.0
+                opacity: (window.currentConn && window.showInfoView && window.currentPower) ? 1.0 : 0.0
                 Behavior on opacity { NumberAnimation { duration: 500 } }
                 
                 Connections {
                     target: window
-                    function onGlobalOrbitAngleChanged() { if (window.currentConn && window.showInfoView) nodeLinesCanvas.requestPaint() }
+                    function onGlobalOrbitAngleChanged() { if (window.currentConn && window.showInfoView && window.currentPower) nodeLinesCanvas.requestPaint() }
                 }
                 
                 onPaint: {
                     var ctx = getContext("2d");
                     ctx.clearRect(0, 0, width, height);
-                    if (!window.currentConn || !window.showInfoView) return;
+                    if (!window.currentConn || !window.showInfoView || !window.currentPower) return;
                     
                     ctx.lineWidth = 1.5;
                     ctx.strokeStyle = window.activeColor;

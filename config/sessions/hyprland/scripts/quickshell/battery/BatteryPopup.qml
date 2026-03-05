@@ -6,7 +6,6 @@ import Quickshell.Io
 
 Item {
     id: window
-    // Window dimensions are now inherited entirely from Main.qml's Loader
     
     // -------------------------------------------------------------------------
     // COLORS (Catppuccin Mocha)
@@ -302,7 +301,6 @@ Item {
                 MouseArea {
                     id: logoutMa
                     anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                    // Changed from Qt.quit() to IPC command
                     onClicked: { Quickshell.execDetached(["sh", "-c", "loginctl terminate-user $USER"]); Quickshell.execDetached(["sh", "-c", "echo 'close' > /tmp/qs_widget_state"]); }
                 }
             }
@@ -542,7 +540,7 @@ Item {
 
                 MouseArea {
                     id: heroMa
-                    anchors.fill: parent
+                    anchors.fill: centralCore 
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onEntered: batCanvas.requestPaint()
@@ -884,7 +882,7 @@ Item {
 
                             Timer {
                                 id: exitTimer; interval: 500 
-                                // Changed from Qt.quit() to IPC command
+                                // FIXED: Was onClicked instead of onTriggered
                                 onTriggered: { Quickshell.execDetached(["sh", "-c", cmd]); Quickshell.execDetached(["sh", "-c", "echo 'close' > /tmp/qs_widget_state"]); }
                             }
                         }
