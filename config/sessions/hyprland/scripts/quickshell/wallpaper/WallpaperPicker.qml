@@ -11,27 +11,41 @@ Item {
     // PROPERTIES & IPC RECEIVER
     // -------------------------------------------------------------------------
     property string widgetArg: ""
-    property int targetWallIndex: 0
+    property string targetWallName: ""
     property bool initialFocusSet: false
 
     onWidgetArgChanged: {
-        let idx = parseInt(widgetArg);
-        if (!isNaN(idx)) {
-            targetWallIndex = idx;
+        if (widgetArg !== "") {
+            targetWallName = widgetArg;
             tryFocus();
         }
     }
 
     function tryFocus() {
-        if (!initialFocusSet) {
-            // Wait until the model has loaded enough items to actually reach our target
-            if (view.count > targetWallIndex) {
-                view.currentIndex = targetWallIndex;
-                view.positionViewAtIndex(targetWallIndex, ListView.Center);
+        if (initialFocusSet) return;
+
+        if (view.count > 0) {
+            let foundIndex = -1;
+
+            // Search for the specific filename
+            if (targetWallName !== "") {
+                for (let i = 0; i < view.count; i++) {
+                    if (folderModel.get(i, "fileName") === targetWallName) {
+                        foundIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (foundIndex !== -1) {
+                // Found the target wallpaper! Focus it.
+                view.currentIndex = foundIndex;
+                view.positionViewAtIndex(foundIndex, ListView.Center);
                 initialFocusSet = true;
-            } else if (folderModel.status === FolderListModel.Ready && view.count > 0) {
-                // Fallback: If the folder completely finished loading but the index is somehow out of bounds
-                let safeIndex = Math.max(0, view.count - 1);
+            } else if (folderModel.status === FolderListModel.Ready) {
+                // Folder finished loading but target is missing (e.g., deleted).
+                // Fallback to the first item safely to avoid getting stuck.
+                let safeIndex = 0;
                 view.currentIndex = safeIndex;
                 view.positionViewAtIndex(safeIndex, ListView.Center);
                 initialFocusSet = true;

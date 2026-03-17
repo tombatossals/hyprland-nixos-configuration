@@ -254,78 +254,39 @@ Item {
             clip: true
 
             // =======================================================
-            // AMBIENT WIDGET COLOR BLOBS
+            // AMBIENT WIDGET COLOR BLOBS (Integrated from Battery)
             // =======================================================
-            Item {
-                anchors.fill: parent
-                z: -1
-                
-                // Primary Weather Blob
-                Rectangle {
-                    width: 800; height: 800; radius: 400
-                    x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * 1.5) * 200
-                    y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * 1.5) * 150
-                    color: window.activeWeatherHex
-                    opacity: 0.05
-                    Behavior on color { ColorAnimation { duration: 1500 } }
-                }
-
-                // Time of Day Blob
-                Rectangle {
-                    width: 700; height: 700; radius: 350
-                    x: (parent.width / 2 - width / 2) + Math.sin(window.globalOrbitAngle * -1.2) * 250
-                    y: (parent.height / 2 - height / 2) + Math.cos(window.globalOrbitAngle * -1.2) * 200
-                    color: window.timeColor
-                    opacity: 0.04
-                    Behavior on color { ColorAnimation { duration: 1500 } }
-                }
-
-                // Time Accent Blob
-                Rectangle {
-                    width: 600; height: 600; radius: 300
-                    x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * 2.0) * -150
-                    y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * 2.0) * -100
-                    color: window.timeAccent
-                    opacity: 0.04
-                    Behavior on color { ColorAnimation { duration: 1500 } }
-                }
+            // Primary Weather Blob
+            Rectangle {
+                width: parent.width * 0.5; height: width; radius: width / 2
+                x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * 2) * 150
+                y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * 2) * 100
+                opacity: 0.04
+                color: window.activeWeatherHex
+                Behavior on color { ColorAnimation { duration: 1000 } }
             }
 
-            // =======================================================
-            // LIMITLESS AMBIENT WEATHER BACKGROUND & ORBITS
-            // =======================================================
-            Repeater {
-                model: 2
-                Rectangle {
-                    anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -100
-                    width: 500 + index * 300
-                    height: width
-                    radius: width / 2
-                    color: "transparent"
-                    border.color: window.activeWeatherHex
-                    border.width: 1
-                    opacity: 0.04
-                    transform: Rotation {
-                        origin.x: width / 2; origin.y: height / 2
-                        angle: window.globalOrbitAngle * (180 / Math.PI) * (index === 0 ? 0.8 : -0.5)
-                    }
-                    Canvas {
-                        anchors.fill: parent
-                        onPaint: {
-                            var ctx = getContext("2d");
-                            ctx.clearRect(0,0,width,height);
-                            ctx.beginPath();
-                            ctx.arc(width/2, height/2, width/2-1, 0, Math.PI*2);
-                            ctx.strokeStyle = window.activeWeatherHex;
-                            ctx.lineWidth = 6;
-                            ctx.setLineDash([30, 80]);
-                            ctx.stroke();
-                        }
-                    }
-                }
+            // Time of Day Blob
+            Rectangle {
+                width: parent.width * 0.6; height: width; radius: width / 2
+                x: (parent.width / 2 - width / 2) + Math.sin(window.globalOrbitAngle * 1.5) * -150
+                y: (parent.height / 2 - height / 2) + Math.cos(window.globalOrbitAngle * 1.5) * -100
+                opacity: 0.03
+                color: window.timeColor
+                Behavior on color { ColorAnimation { duration: 1000 } }
             }
 
+            // Time Accent Blob
+            Rectangle {
+                width: parent.width * 0.45; height: width; radius: width / 2
+                x: (parent.width / 2 - width / 2) + Math.cos(window.globalOrbitAngle * -1.8) * 120
+                y: (parent.height / 2 - height / 2) + Math.sin(window.globalOrbitAngle * -1.8) * -120
+                opacity: 0.02
+                color: window.timeAccent
+                Behavior on color { ColorAnimation { duration: 1000 } }
+            }
+
+            // Big Parallax Weather Icon
             Text {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: -100

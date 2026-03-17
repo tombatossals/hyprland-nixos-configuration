@@ -196,8 +196,8 @@ get_data() {
 if [[ "$1" == "--getdata" ]]; then 
     get_data
 elif [[ "$1" == "--json" ]]; then
-    # Cache Limit: 30 minutes
-    CACHE_LIMIT=1800
+    # Cache Limit: 15 minutes
+    CACHE_LIMIT=900
 
     if [ -f "$json_file" ]; then
         file_time=$(stat -c %Y "$json_file")
@@ -235,4 +235,16 @@ elif [[ "$1" == "--nav" ]]; then
 elif [[ "$1" == "--icon" ]]; then cat "$json_file" | jq -r '.forecast[0].icon'
 elif [[ "$1" == "--temp" ]]; then t=$(cat "$json_file" | jq -r '.forecast[0].max'); echo "${t}°C"
 elif [[ "$1" == "--hex" ]]; then cat "$json_file" | jq -r '.forecast[0].hex'
+
+# --- NEW HOURLY MODES FOR TOPBAR ---
+elif [[ "$1" == "--current-icon" ]]; then 
+    curr_time=$(date +%H:%M)
+    cat "$json_file" | jq -r --arg ct "$curr_time" '.forecast[0].hourly | map(select(.time >= $ct)) | if length > 0 then .[0].icon else .[-1].icon end'
+elif [[ "$1" == "--current-temp" ]]; then 
+    curr_time=$(date +%H:%M)
+    t=$(cat "$json_file" | jq -r --arg ct "$curr_time" '.forecast[0].hourly | map(select(.time >= $ct)) | if length > 0 then .[0].temp else .[-1].temp end')
+    echo "${t}°C"
+elif [[ "$1" == "--current-hex" ]]; then 
+    curr_time=$(date +%H:%M)
+    cat "$json_file" | jq -r --arg ct "$curr_time" '.forecast[0].hourly | map(select(.time >= $ct)) | if length > 0 then .[0].hex else .[-1].hex end'
 fi

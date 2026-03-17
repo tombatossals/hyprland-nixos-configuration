@@ -44,7 +44,7 @@ handle_wallpaper_prep() {
         done
     ) &
 
-    TARGET_INDEX=0
+    TARGET_THUMB=""
     CURRENT_SRC=""
 
     if pgrep -a "mpvpaper" > /dev/null; then
@@ -64,13 +64,9 @@ handle_wallpaper_prep() {
         else
             TARGET_THUMB="$CURRENT_SRC"
         fi
-
-        MATCH_LINE=$(ls -1 "$THUMB_DIR" | grep -nF "$TARGET_THUMB" | cut -d: -f1)
-        if [ -n "$MATCH_LINE" ]; then
-            TARGET_INDEX=$((MATCH_LINE - 1))
-        fi
     fi
-    export WALLPAPER_INDEX="$TARGET_INDEX"
+    
+    export WALLPAPER_THUMB="$TARGET_THUMB"
 }
 
 handle_network_prep() {
@@ -118,10 +114,8 @@ if [[ "$ACTION" =~ ^[0-9]+$ ]]; then
         hyprctl dispatch workspace "$WORKSPACE_NUM"
     fi
 
-    # Find the address of the first window in the target workspace that isn't qs-master
     TARGET_ADDR=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $WORKSPACE_NUM and (.class | contains(\"qs-master\") | not) and (.title | contains(\"qs-master\") | not)) | .address" | head -n 1)
 
-    # Focus the target window if it exists, otherwise fallback to qs-master, preventing cursor warps
     if [[ -n "$TARGET_ADDR" && "$TARGET_ADDR" != "null" ]]; then
         hyprctl --batch "keyword cursor:no_warps true ; dispatch focuswindow address:$TARGET_ADDR ; keyword cursor:no_warps false"
     else
@@ -149,21 +143,16 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
         CURRENT_MODE=$(cat "$NETWORK_MODE_FILE" 2>/dev/null)
 
         if [[ "$ACTION" == "toggle" && "$ACTIVE_WIDGET" == "network" ]]; then
-            # The popup is currently open
             if [[ -n "$SUBTARGET" ]]; then
                 if [[ "$CURRENT_MODE" == "$SUBTARGET" ]]; then
-                    # We clicked the pill matching the active tab -> Close
                     echo "close" > "$IPC_FILE"
                 else
-                    # We clicked the pill for the OTHER tab -> Switch tabs
                     echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
                 fi
             else
-                # Generic toggle hit while open -> Close
                 echo "close" > "$IPC_FILE"
             fi
         else
-            # The popup is closed, or we are forcing open
             handle_network_prep
             if [[ -n "$SUBTARGET" ]]; then
                 echo "$SUBTARGET" > "$NETWORK_MODE_FILE"
@@ -175,7 +164,8 @@ if [[ "$ACTION" == "open" || "$ACTION" == "toggle" ]]; then
 
     if [[ "$TARGET" == "wallpaper" ]]; then
         handle_wallpaper_prep
-        echo "$TARGET:$WALLPAPER_INDEX" > "$IPC_FILE"
+        # Passing the exact filename string to QML instead of an index
+        echo "$TARGET:$WALLPAPER_THUMB" > "$IPC_FILE"
     else
         echo "$TARGET" > "$IPC_FILE"
     fi

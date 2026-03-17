@@ -184,9 +184,9 @@ PanelWindow {
     Process {
         id: weatherPoller
         command: ["bash", "-c", `
-            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --icon)"
-            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --temp)"
-            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --hex)"
+            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-icon)"
+            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-temp)"
+            echo "$(~/.config/hypr/scripts/quickshell/calendar/weather.sh --current-hex)"
         `]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -399,7 +399,7 @@ PanelWindow {
                 visible: Layout.preferredWidth > 0 
 
                 // Slides open elegantly
-                Behavior on targetWidth { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
+                Behavior on targetWidth { NumberAnimation { duration: 1400; easing.type: Easing.OutExpo } }
                 
                 Item {
                     id: mediaLayoutContainer
