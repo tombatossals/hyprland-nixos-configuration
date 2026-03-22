@@ -32,6 +32,7 @@ Item {
     readonly property color teal: _theme.teal
     readonly property color sapphire: _theme.sapphire
     readonly property color blue: _theme.blue
+
     // -------------------------------------------------------------------------
     // STATE & POLLING
     // -------------------------------------------------------------------------
@@ -55,6 +56,7 @@ Item {
 
     readonly property bool isCharging: batStatus === "Charging"
 
+    // Use a unified hue for the start colors
     readonly property color batColorStart: {
         if (isCharging) return window.green;
         if (batCapacity >= 70) return window.blue;
@@ -62,12 +64,8 @@ Item {
         return window.red;
     }
 
-    readonly property color batColorEnd: {
-        if (isCharging) return window.teal;
-        if (batCapacity >= 70) return window.sapphire;
-        if (batCapacity >= 30) return window.peach;
-        return window.maroon;
-    }
+    // Mathematically derive a cohesive, realistic end color instead of arbitrarily mapping to Teal/Sapphire/Maroon
+    readonly property color batColorEnd: Qt.lighter(batColorStart, 1.15)
 
     readonly property color profileStart: {
         if (powerProfile === "performance") return window.red;
@@ -75,17 +73,15 @@ Item {
         return window.blue;
     }
     
-    readonly property color profileEnd: {
-        if (powerProfile === "performance") return window.maroon;
-        if (powerProfile === "power-saver") return window.teal;
-        return window.sapphire;
-    }
+    readonly property color profileEnd: Qt.lighter(profileStart, 1.15)
 
     readonly property color ambientPrimary: window.batColorStart
+
+    // Keep the background blobs distinct and interesting by using alternative Matugen palette colors
     readonly property color ambientSecondary: {
-        if (powerProfile === "performance") return window.profileEnd;
-        if (powerProfile === "power-saver") return window.profileEnd;
-        return window.batColorEnd; 
+        if (powerProfile === "performance") return window.peach;
+        if (powerProfile === "power-saver") return window.teal;
+        return window.sapphire; 
     }
 
     property real animCapacity: 0
@@ -617,7 +613,7 @@ Item {
                                         height: parent.height
                                         width: parent.width * (window.sysBrightness / 100)
                                         radius: 9
-                                        opacity: briMa.containsMouse ? 0.9 : 0.7
+                                        opacity: briMa.containsMouse ? 1.0 : 0.85
                                         Behavior on opacity { NumberAnimation { duration: 200 } }
                                         Behavior on width { enabled: !window.isDraggingBri; NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
 
@@ -657,7 +653,7 @@ Item {
                                 Layout.preferredHeight: 32
                                 radius: 16
                                 color: volIconMa.containsMouse ? "#1affffff" : "transparent"
-                                border.color: volIconMa.containsMouse ? window.ambientSecondary : "transparent"
+                                border.color: volIconMa.containsMouse ? window.profileStart : "transparent"
                                 Behavior on color { ColorAnimation { duration: 150 } }
                                 Behavior on border.color { ColorAnimation { duration: 150 } }
 
@@ -666,7 +662,7 @@ Item {
                                     text: window.sysMuted || window.sysVolume === 0 ? "󰖁" : (window.sysVolume > 50 ? "󰕾" : "󰖀")
                                     font.family: "Iosevka Nerd Font"
                                     font.pixelSize: 22
-                                    color: window.sysMuted ? window.overlay0 : window.ambientSecondary
+                                    color: window.sysMuted ? window.overlay0 : window.profileStart
                                     Behavior on color { ColorAnimation { duration: 200 } }
                                 }
                                 MouseArea {
@@ -716,14 +712,14 @@ Item {
                                         height: parent.height
                                         width: parent.width * (window.sysVolume / 100)
                                         radius: 9
-                                        opacity: window.sysMuted ? 0.5 : (volMa.containsMouse ? 0.9 : 0.7)
+                                        opacity: window.sysMuted ? 0.5 : (volMa.containsMouse ? 1.0 : 0.85)
                                         Behavior on opacity { NumberAnimation { duration: 200 } }
                                         Behavior on width { enabled: !window.isDraggingVol; NumberAnimation { duration: 200; easing.type: Easing.OutQuint } }
 
                                         gradient: Gradient {
                                             orientation: Gradient.Horizontal
-                                            GradientStop { position: 0.0; color: window.sysMuted ? window.overlay0 : window.profileStart; Behavior on color { ColorAnimation { duration: 300 } } }
-                                            GradientStop { position: 1.0; color: window.sysMuted ? window.subtext0 : window.profileEnd; Behavior on color { ColorAnimation { duration: 300 } } }
+                                            GradientStop { position: 0.0; color: window.sysMuted ? window.surface2 : window.profileStart; Behavior on color { ColorAnimation { duration: 300 } } }
+                                            GradientStop { position: 1.0; color: window.sysMuted ? Qt.lighter(window.surface2, 1.15) : window.profileEnd; Behavior on color { ColorAnimation { duration: 300 } } }
                                         }
                                     }
                                 }

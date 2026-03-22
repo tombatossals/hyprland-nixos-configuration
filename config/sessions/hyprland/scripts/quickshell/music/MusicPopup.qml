@@ -892,6 +892,7 @@ Item {
                         Row {
                             id: eqSliderRow
                             anchors.fill: parent
+                            z: 1 // Ensures sliders (and their handles) render over the lightning
 
                             Repeater {
                                 model: [
@@ -1087,51 +1088,51 @@ Item {
                                                 }
                                             }
 
-                                        handle: Rectangle {
-                                            x: eqSlider.leftPadding + (eqSlider.availableWidth - width) / 2
-                                            y: eqSlider.topPadding + eqSlider.visualPosition * (eqSlider.availableHeight - height)
-                                            implicitWidth: 18
-                                            implicitHeight: 18
-                                            width: 18; height: 18
-                                            radius: 9; color: root.text
+                                            handle: Rectangle {
+                                                x: eqSlider.leftPadding + (eqSlider.availableWidth - width) / 2
+                                                y: eqSlider.topPadding + eqSlider.visualPosition * (eqSlider.availableHeight - height)
+                                                implicitWidth: 18
+                                                implicitHeight: 18
+                                                width: 18; height: 18
+                                                radius: 9; color: root.text
 
-                                            property var catColors: [root.mauve, root.pink, root.lavender, root.mauve, root.blue]
+                                                property var catColors: [root.mauve, root.pink, root.lavender, root.mauve, root.blue]
 
-                                            // Core glow flare that cleanly fades out matching the canvas
-                                            Rectangle {
-                                                anchors.centerIn: parent
-                                                width: parent.width + 36 * sliderDelegate.hitPulse // Bigger bloom
-                                                height: width
-                                                radius: width / 2
-                                                color: parent.catColors[index % parent.catColors.length]
-                                                opacity: sliderDelegate.hitPulse * (1.0 - root.eqLightningFade)
-                                                layer.enabled: true
-                                                layer.effect: MultiEffect { blurEnabled: true; blurMax: 32; blur: 1.0 }
+                                                // Core glow flare that cleanly fades out matching the canvas
+                                                Rectangle {
+                                                    anchors.centerIn: parent
+                                                    width: parent.width + 36 * sliderDelegate.hitPulse // Bigger bloom
+                                                    height: width
+                                                    radius: width / 2
+                                                    color: parent.catColors[index % parent.catColors.length]
+                                                    opacity: sliderDelegate.hitPulse * (1.0 - root.eqLightningFade)
+                                                    layer.enabled: true
+                                                    layer.effect: MultiEffect { blurEnabled: true; blurMax: 32; blur: 1.0 }
+                                                }
+
+                                                // Pop the handle itself slightly as the beam passes
+                                                scale: 1.0 + (sliderDelegate.hitPulse * 0.4 * (1.0 - root.eqLightningFade))
                                             }
-
-                                            // Pop the handle itself slightly as the beam passes
-                                            scale: 1.0 + (sliderDelegate.hitPulse * 0.4 * (1.0 - root.eqLightningFade))
                                         }
-                                    }
-                                    Text {
-                                        text: modelData.lbl
-                                        color: root.overlay1
-                                        font.family: "JetBrains Mono"
-                                        font.pixelSize: 10
-                                        font.bold: true
-                                        Layout.alignment: Qt.AlignHCenter
+                                        Text {
+                                            text: modelData.lbl
+                                            color: root.overlay1
+                                            font.family: "JetBrains Mono"
+                                            font.pixelSize: 10
+                                            font.bold: true
+                                            Layout.alignment: Qt.AlignHCenter
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
                         // --- THE FLUID CANVAS LIGHTNING (Optimized for Realism and multiple waves) ---
                         Canvas {
                             id: lightningCanvas
                             anchors.fill: parent
                             opacity: 1.0 - root.eqLightningFade
-                            z: 10 // Draw securely over the sliders
+                            z: 0 // Draw securely behind the sliders
 
                             // Force hardware FBO backend instead of slow software rendering
                             renderTarget: Canvas.FramebufferObject 

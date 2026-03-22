@@ -88,7 +88,8 @@ Item {
     
     property string activeMode: "bt"
     readonly property color activeColor: activeMode === "wifi" ? window.sapphire : window.mauve
-    readonly property color activeGradientSecondary: activeMode === "wifi" ? window.blue : window.pink
+    // Calculate a subtle, pure one-color gradient rather than mixing two distinct palette colors
+    readonly property color activeGradientSecondary: Qt.darker(window.activeColor, 1.25)
 
     // Dictionary objects to allow multi-device simultaneous connects/disconnects without globally locking
     property var busyTasks: ({})
@@ -601,7 +602,7 @@ Item {
                         radius: width / 2
                         color: "transparent"
                         
-                        border.color: Object.keys(window.disconnectingDevices).length > 0 ? "#9A1020" : window.activeColor
+                        border.color: Object.keys(window.disconnectingDevices).length > 0 ? window.red : window.activeColor
                         border.width: Object.keys(window.disconnectingDevices).length > 0 ? 2 : 1
                         
                         Behavior on border.color { ColorAnimation { duration: 150 } }
@@ -822,6 +823,7 @@ Item {
                                 NumberAnimation { to: 1.0; duration: 400; easing.type: Easing.OutQuint }
                             }
 
+                            // A pure, mathematically subtle gradient rather than a dual-color mash
                             gradient: Gradient {
                                 orientation: Gradient.Vertical
                                 GradientStop {
@@ -829,8 +831,8 @@ Item {
                                     color: {
                                         if (!window.currentPower) return window.mantle;
                                         if (isMyDisconnecting) return window.surface0; 
-                                        if (centralCore.isDangerState && window.currentConn) return window.peach;
-                                        return window.currentConn ? window.activeColor : window.surface0;
+                                        if (centralCore.isDangerState && window.currentConn) return Qt.lighter(window.red, 1.15);
+                                        return window.currentConn ? Qt.lighter(window.activeColor, 1.15) : window.surface0;
                                     }
                                     Behavior on color { ColorAnimation { duration: 300 } }
                                 }
@@ -839,8 +841,8 @@ Item {
                                     color: {
                                         if (!window.currentPower) return window.crust;
                                         if (isMyDisconnecting) return window.base; 
-                                        if (centralCore.isDangerState && window.currentConn) return window.maroon;
-                                        return window.currentConn ? window.activeGradientSecondary : window.base;
+                                        if (centralCore.isDangerState && window.currentConn) return window.red;
+                                        return window.currentConn ? window.activeColor : window.base;
                                     }
                                     Behavior on color { ColorAnimation { duration: 300 } }
                                 }
@@ -849,8 +851,8 @@ Item {
                             border.color: {
                                 if (!window.currentPower) return window.crust;
                                 if (isMyDisconnecting) return window.surface0;
-                                if (centralCore.isDangerState && window.currentConn) return window.red;
-                                return window.currentConn ? window.activeColor : window.surface1;
+                                if (centralCore.isDangerState && window.currentConn) return window.maroon;
+                                return window.currentConn ? Qt.lighter(window.activeColor, 1.1) : window.surface1;
                             }
                             Behavior on border.color { ColorAnimation { duration: 300 } }
                             
@@ -906,9 +908,10 @@ Item {
                                     }
                                     ctx.closePath();
                                     
+                                    // Matugen wash-out drain effect against the red danger orb
                                     var grad = ctx.createLinearGradient(0, 0, 0, height);
-                                    grad.addColorStop(0, "#E61919"); 
-                                    grad.addColorStop(1, Qt.darker(window.red, 1.4).toString());
+                                    grad.addColorStop(0, window.surface1.toString()); 
+                                    grad.addColorStop(1, window.crust.toString());
                                     ctx.fillStyle = grad;
                                     ctx.fill();
                                     ctx.restore();
@@ -1318,8 +1321,8 @@ Item {
                                     
                                     gradient: Gradient {
                                         orientation: Gradient.Horizontal
-                                        GradientStop { position: 0.0; color: window.activeColor }
-                                        GradientStop { position: 1.0; color: window.activeGradientSecondary }
+                                        GradientStop { position: 0.0; color: Qt.lighter(window.activeColor, 1.15) }
+                                        GradientStop { position: 1.0; color: window.activeColor }
                                     }
                                     z: -1
                                 }
@@ -1391,8 +1394,8 @@ Item {
                                         ctx.closePath();
 
                                         var grad = ctx.createLinearGradient(0, 0, currentW, 0);
-                                        grad.addColorStop(0, window.activeColor);
-                                        grad.addColorStop(1, window.activeGradientSecondary);
+                                        grad.addColorStop(0, Qt.lighter(window.activeColor, 1.15).toString());
+                                        grad.addColorStop(1, window.activeColor.toString());
                                         ctx.fillStyle = grad;
                                         ctx.fill();
 
@@ -1635,8 +1638,8 @@ Item {
                             Behavior on opacity { NumberAnimation { duration: 300 } }
                             gradient: Gradient {
                                 orientation: Gradient.Horizontal
-                                GradientStop { position: 0.0; color: window.sapphire }
-                                GradientStop { position: 1.0; color: window.blue }
+                                GradientStop { position: 0.0; color: Qt.lighter(window.sapphire, 1.15) }
+                                GradientStop { position: 1.0; color: window.sapphire }
                             }
                         }
 
@@ -1672,8 +1675,8 @@ Item {
                             Behavior on opacity { NumberAnimation { duration: 300 } }
                             gradient: Gradient {
                                 orientation: Gradient.Horizontal
-                                GradientStop { position: 0.0; color: window.mauve }
-                                GradientStop { position: 1.0; color: window.pink }
+                                GradientStop { position: 0.0; color: Qt.lighter(window.mauve, 1.15) }
+                                GradientStop { position: 1.0; color: window.mauve }
                             }
                         }
 
@@ -1713,8 +1716,8 @@ Item {
                     Behavior on opacity { NumberAnimation { duration: 300 } }
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: window.activeColor; Behavior on color { ColorAnimation {duration: 300} } }
-                        GradientStop { position: 1.0; color: window.activeGradientSecondary; Behavior on color { ColorAnimation {duration: 300} } }
+                        GradientStop { position: 0.0; color: Qt.lighter(window.activeColor, 1.15); Behavior on color { ColorAnimation {duration: 300} } }
+                        GradientStop { position: 1.0; color: window.activeColor; Behavior on color { ColorAnimation {duration: 300} } }
                     }
                 }
                 
