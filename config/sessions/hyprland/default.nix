@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   imports = [
@@ -57,7 +62,7 @@
       };
     };
     input = {
-      kb_layout = "us, ru";
+      kb_layout = "es";
       kb_variant = "";
       kb_model = "";
       kb_rules = "";
@@ -76,6 +81,5 @@
 
   home.sessionVariables.NIXOS_OZONE_WL = "1";
   home.file.".config/hypr/scripts".source =
-  config.lib.file.mkOutOfStoreSymlink
-    "/etc/nixos/config/sessions/hyprland/scripts";
+    config.lib.file.mkOutOfStoreSymlink "/etc/nixos/config/sessions/hyprland/scripts";
 }
