@@ -144,12 +144,16 @@
   # Fonts
   fonts.packages = with pkgs; [
     udev-gothic-nf
+    nerd-fonts.jetbrains-mono
     noto-fonts
     liberation_ttf
   ]; 
 
   fonts.fontconfig = {
     enable = true;
+    defaultFonts = {
+      monospace = [ "JetBrainsMono Nerd Font Mono" "Noto Sans Mono" ];
+    };
     hinting.style = "slight"; 
     subpixel.rgba = "rgb"; 
   };
