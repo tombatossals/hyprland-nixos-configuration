@@ -15,7 +15,7 @@ if  [[ $1 = "--lock" ]]; then
 elif  [[ $1 = "--logout" ]]; then
 	close_eww
     #openbox --exit
-    loginctl terminate-user ilyamiro
+    loginctl terminate-user dave
 
 elif  [[ $1 = "--suspend" ]]; then
 	close_eww

@@ -227,7 +227,7 @@
 ;; power buttons
 (defwidget logout [] 
 	(box :class "genwin" :vexpand "false" :hexpand "false" 
-		(button :class "btn_logout" :onclick "loginctl terminate-user ilyamiro" "")))
+		(button :class "btn_logout" :onclick "loginctl terminate-user dave" "")))
 (defwidget sleep [] 
 	(box :class "genwin" :vexpand "false" :hexpand "false" 
 		(button :class "btn_sleep" :onclick "hyprlock & systemctl suspend" "")))

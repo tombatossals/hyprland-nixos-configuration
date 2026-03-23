@@ -19,7 +19,7 @@
       update = "sudo nixos-rebuild switch";
       stop = "shutdown now";
       edconf = "sudo -E nvim /etc/nixos/configuration.nix";
-      out = "loginctl terminate-user ilyamiro";
+      out = "loginctl terminate-user dave";
       edeww = "sudo -E nvim /etc/nixos/config/programs/eww/new-eww/";
       cateww_bar = ''
     printf "I am on nix-os system, using hyprland, and I am using eww for my top bar.\n\nI have this eww.yuck:\n%s\n\nAnd this eww.scss:\n%s\n" \

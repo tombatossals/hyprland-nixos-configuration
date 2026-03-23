@@ -27,18 +27,13 @@
     ffmpeg
     python314
     (wrapFirefox (pkgs.firefox-unwrapped.override { pipewireSupport = true; }) {})
-    telegram-desktop
-    kitty
-    libreoffice-qt
     hunspell
     hunspellDicts.ru_RU
-    hunspellDicts.en_US
+    hunspellDicts.es_ES
     obsidian
-    obs-studio
     p7zip
     papers
     fastfetch
-    jetbrains.idea-community
     quickshell
     gnome-shell-extensions
     grim
@@ -50,22 +45,21 @@
     swappy
     slurp
     mpvpaper
+    foot
     gnome-tweaks
     pkgsCross.mingwW64.stdenv.cc
     wmctrl
     bottles
     qbittorrent
     power-profiles-daemon
-    jdk8
-    steam-run
   ];
 
   environment.pathsToLink = [ "/share/gsettings-schemas" ];
 
   # User accounts and security
-  users.users.ilyamiro = {
+  users.users.dave = {
     isNormalUser = true;
-    description = "ilyamiro";
+    description = "dave";
     extraGroups = [ "networkmanager" "wheel" "video" "adbusers"]; # Added "video" group
     packages = with pkgs; [
     #  thunderbird
@@ -79,7 +73,7 @@
 
   security.sudo.extraRules = [
     {
-      users = [ "ilyamiro" ];
+      users = [ "dave" ];
       commands = [
         {
           command = "ALL";
@@ -92,6 +86,7 @@
   services.logind.settings.Login = {
     HandlePowerKey = "ignore";
   }; 
+
   # Program configurations
   programs.zsh.enable = true;
 
@@ -104,18 +99,11 @@
     enable = true;
   };
 
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; 
-    dedicatedServer.openFirewall = true; 
-  };
-  programs.gamemode.enable = true;
-
   # Home manager
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true; 
   
-  home-manager.users.ilyamiro = {
+  home-manager.users.dave = {
     imports = [ ./home.nix ];
   };
 
@@ -123,9 +111,19 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.displayManager.gdm.enable = true;
-  services.desktopManager.gnome.enable = true;
-  
+  #services.displayManager.gdm.enable = true;
+  #services.desktopManager.gnome.enable = true;
+ 
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = "dave";
+  };
+
   # Hyprland
   programs.hyprland.enable = true;
   
@@ -139,7 +137,7 @@
 
   # Configure keymap in X11
   services.xserver.xkb = {
-    layout = "us,ru";
+    layout = "es";
     variant = "";
   };
 
@@ -160,31 +158,31 @@
   services.flatpak.enable = true;
 
   # Environment Variables
-  # environment.variables.XDG_DATA_DIRS = lib.mkForce "/home/ilyamiro/.nix-profile/share:/run/current-system/sw/share";
+  # environment.variables.XDG_DATA_DIRS = lib.mkForce "/home/dave/.nix-profile/share:/run/current-system/sw/share";
 
   # Networking and time
-  networking.hostName = "ilyamiro"; 
+  networking.hostName = "orion"; 
   
   networking.networkmanager = {
     enable = true;
     wifi.powersave = false; 
   };
    # Set your time zone.
-  time.timeZone = "Europe/Copenhagen";
+  time.timeZone = "Europe/Madrid";
 
   # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "es_ES.UTF-8";
 
   i18n.extraLocaleSettings = {
-    LC_ADDRESS = "en_US.UTF-8";
-    LC_IDENTIFICATION = "en_US.UTF-8";
-    LC_MEASUREMENT = "en_US.UTF-8";
-    LC_MONETARY = "en_US.UTF-8";
-    LC_NAME = "en_US.UTF-8";
-    LC_NUMERIC = "en_US.UTF-8";
-    LC_PAPER = "en_US.UTF-8";
-    LC_TELEPHONE = "en_US.UTF-8";
-    LC_TIME = "en_US.UTF-8";
+    LC_ADDRESS = "es_ES.UTF-8";
+    LC_IDENTIFICATION = "es_ES.UTF-8";
+    LC_MEASUREMENT = "es_ES.UTF-8";
+    LC_MONETARY = "es_ES.UTF-8";
+    LC_NAME = "es_ES.UTF-8";
+    LC_NUMERIC = "es_ES.UTF-8";
+    LC_PAPER = "es_ES.UTF-8";
+    LC_TELEPHONE = "es_ES.UTF-8";
+    LC_TIME = "es_ES.UTF-8";
   };
 
   # Audio and system services
@@ -196,6 +194,7 @@
     alsa.support32Bit = true;
     pulse.enable = true;
   };
+
   services.blueman.enable = true;
 
   # Enable CUPS to print documents.
@@ -217,6 +216,7 @@
     dates = "daily";
     options = "--delete-older-than 14d";
   };
+
   boot = {
     plymouth = {
       enable = true;
@@ -251,19 +251,17 @@
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "udev.log_priority=3"
-      "amd_pstate=active" 
       "tsc=reliable" 
       "asus_wmi"
     ];
-    
   };
+
   # Bootloader and kernel
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # Kernel Packages and Optimization
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  hardware.cpu.amd.updateMicrocode = true;
 
   boot.kernelModules = [ "tcp_bbr" ]; # FIX: Network Congestion Control (Helps with packet jitter)
   boot.kernel.sysctl = {
@@ -282,12 +280,16 @@
   # GPU / GRAPHICS CONFIGURATION (ADDED)
   # ==========================================
 
-  # Enable OpenGL/Vulkan (renamed to hardware.graphics in 24.11+)
+  # Gráficos — virgl para UTM en ARM
   hardware.graphics = {
     enable = true;
-    enable32Bit = true; # Required for Steam/CS2
+    extraPackages = with pkgs; [
+      mesa
+      virglrenderer
+    ];
   };
 
+/*
   # Load NVIDIA Drivers
   services.xserver.videoDrivers = [ "nvidia" ];
 
@@ -330,6 +332,7 @@
       amdgpuBusId = "PCI:4:0:0";
     };
   };
+*/
 
   system.stateVersion = "25.11"; 
 }

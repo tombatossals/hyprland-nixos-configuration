@@ -12,7 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 URL = "https://all.uddataplus.dk/skema/?id=id_menu_skema#menu_skema:" 
 # PATH to the 'eww-schedule' profile folder you created
-PROFILE_PATH = "/home/ilyamiro/.mozilla/firefox/21ersfgr.eww-shedule"
+PROFILE_PATH = "/home/dave/.mozilla/firefox/21ersfgr.eww-shedule"
 
 
 def debug_schedule():
