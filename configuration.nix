@@ -2,56 +2,61 @@
 # your system. Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   # Imports
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-      <home-manager/nixos>
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    <home-manager/nixos>
+  ];
 
   home-manager.backupFileExtension = "backup";
 
   # System packages
   environment.systemPackages = with pkgs; [
-    wget 
-    taskwarrior3
-    git
-    btop
-    matugen
-    neovim
-    direnv
-    python311
-    ffmpeg
-    python314
-    (wrapFirefox (pkgs.firefox-unwrapped.override { pipewireSupport = true; }) {})
-    hunspell
-    hunspellDicts.ru_RU
-    hunspellDicts.es_ES
-    obsidian
-    p7zip
-    papers
-    fastfetch
-    quickshell
-    gnome-shell-extensions
-    grim
-    playerctl
-    satty
-    yq-go
-    xdg-desktop-portal-gtk
-    eww
-    swappy
-    slurp
-    mpvpaper
-    foot
-    gnome-tweaks
-    pkgsCross.mingwW64.stdenv.cc
-    wmctrl
-    bottles
-    qbittorrent
-    power-profiles-daemon
+    wget # Descarga archivos desde HTTP/HTTPS/FTP.
+    taskwarrior3 # Gestor de tareas en terminal.
+    git # Control de versiones distribuido.
+    btop # Monitor interactivo de sistema y procesos.
+    matugen # Genera paletas de color desde imágenes.
+    neovim # Editor de texto modal.
+    direnv # Carga variables de entorno por directorio.
+    python311 # Intérprete de Python 3.11.
+    ffmpeg # Conversión y procesamiento de audio/video.
+    python314 # Intérprete de Python 3.14.
+    (wrapFirefox (pkgs.firefox-unwrapped.override { pipewireSupport = true; }) { }) # Firefox con soporte PipeWire.
+    hunspell # Corrector ortográfico base.
+    hunspellDicts.ru_RU # Diccionario Hunspell ruso.
+    hunspellDicts.es_ES # Diccionario Hunspell español.
+    obsidian # App de notas en Markdown.
+    p7zip # Compresión/descompresión 7z.
+    papers # Visor de documentos.
+    fastfetch # Información del sistema en terminal.
+    quickshell # Runtime para componentes/overlays QML.
+    gnome-shell-extensions # Herramientas/extensiones de GNOME Shell.
+    grim # Captura de pantalla en Wayland.
+    playerctl # Control multimedia vía MPRIS.
+    satty # Editor/anotador para capturas.
+    yq-go # Procesamiento de YAML/JSON desde CLI.
+    xdg-desktop-portal-gtk # Portal GTK para apps sandboxed.
+    eww # Widgets para Wayland/X11.
+    swappy # Edición rápida de capturas.
+    slurp # Selección de región en pantalla para Wayland.
+    mpvpaper # Vídeo/fondo animado como wallpaper.
+    foot # Emulador de terminal Wayland.
+    gnome-tweaks # Ajustes avanzados de GNOME.
+    pkgsCross.mingwW64.stdenv.cc # Toolchain GCC cruzado para Windows.
+    wmctrl # Control de ventanas desde CLI.
+    bottles # Gestión de apps de Windows con Wine.
+    qbittorrent # Cliente BitTorrent.
+    power-profiles-daemon # Perfiles de energía del sistema.
   ];
 
   environment.pathsToLink = [ "/share/gsettings-schemas" ];
@@ -60,13 +65,18 @@
   users.users.dave = {
     isNormalUser = true;
     description = "dave";
-    extraGroups = [ "networkmanager" "wheel" "video" "adbusers"]; # Added "video" group
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "video"
+      "adbusers"
+    ]; # Added "video" group
     packages = with pkgs; [
-    #  thunderbird
+      #  thunderbird
     ];
     useDefaultShell = true;
     shell = pkgs.zsh;
-  };    
+  };
 
   users.defaultUserShell = pkgs.zsh;
   system.userActivationScripts.zshrc = "touch .zshrc";
@@ -85,7 +95,7 @@
 
   services.logind.settings.Login = {
     HandlePowerKey = "ignore";
-  }; 
+  };
 
   # Program configurations
   programs.zsh.enable = true;
@@ -101,8 +111,8 @@
 
   # Home manager
   home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = true; 
-  
+  home-manager.useUserPackages = true;
+
   home-manager.users.dave = {
     imports = [ ./home.nix ];
   };
@@ -113,7 +123,7 @@
   # Enable the GNOME Desktop Environment.
   #services.displayManager.gdm.enable = true;
   #services.desktopManager.gnome.enable = true;
- 
+
   services.displayManager.sddm = {
     enable = true;
     wayland.enable = true;
@@ -126,7 +136,7 @@
 
   # Hyprland
   programs.hyprland.enable = true;
-  
+
   # XDG Portals
   xdg.portal = {
     enable = true;
@@ -147,15 +157,18 @@
     nerd-fonts.jetbrains-mono
     noto-fonts
     liberation_ttf
-  ]; 
+  ];
 
   fonts.fontconfig = {
     enable = true;
     defaultFonts = {
-      monospace = [ "JetBrainsMono Nerd Font Mono" "Noto Sans Mono" ];
+      monospace = [
+        "JetBrainsMono Nerd Font Mono"
+        "Noto Sans Mono"
+      ];
     };
-    hinting.style = "slight"; 
-    subpixel.rgba = "rgb"; 
+    hinting.style = "slight";
+    subpixel.rgba = "rgb";
   };
 
   # Flatpak
@@ -165,13 +178,13 @@
   # environment.variables.XDG_DATA_DIRS = lib.mkForce "/home/dave/.nix-profile/share:/run/current-system/sw/share";
 
   # Networking and time
-  networking.hostName = "orion"; 
-  
+  networking.hostName = "orion";
+
   networking.networkmanager = {
     enable = true;
-    wifi.powersave = false; 
+    wifi.powersave = false;
   };
-   # Set your time zone.
+  # Set your time zone.
   time.timeZone = "Europe/Madrid";
 
   # Select internationalisation properties.
@@ -208,12 +221,15 @@
   services.openssh.enable = true;
 
   # Power Management Services
-  services.power-profiles-daemon.enable = true; 
+  services.power-profiles-daemon.enable = true;
 
   # Nix settings and maintenance
   nixpkgs.config.allowUnfree = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   nix.gc = {
     automatic = true;
@@ -229,20 +245,20 @@
         (pkgs.stdenv.mkDerivation {
           pname = "plymouth-theme-simple";
           version = "1.0";
-          
+
           # CHANGE THIS to the actual path of your custom theme folder
-          src = /etc/nixos/config/programs/plymouth/simple; 
+          src = /etc/nixos/config/programs/plymouth/simple;
 
           installPhase = ''
             mkdir -p $out/share/plymouth/themes/simple
             cp -r * $out/share/plymouth/themes/simple/
-            
+
             # This dynamically replaces the @out@ placeholder with the real Nix store path
             substituteInPlace $out/share/plymouth/themes/simple/simple.plymouth \
               --replace "@out@" "$out"
           '';
-        })      
-	];
+        })
+      ];
     };
 
     consoleLogLevel = 0;
@@ -255,7 +271,7 @@
       "rd.systemd.show_status=false"
       "rd.udev.log_level=3"
       "udev.log_priority=3"
-      "tsc=reliable" 
+      "tsc=reliable"
       "asus_wmi"
     ];
   };
@@ -293,50 +309,50 @@
     ];
   };
 
-/*
-  # Load NVIDIA Drivers
-  services.xserver.videoDrivers = [ "nvidia" ];
+  /*
+    # Load NVIDIA Drivers
+    services.xserver.videoDrivers = [ "nvidia" ];
 
-  hardware.nvidia = {
-    # Modesetting is required.
-    modesetting.enable = true;
+    hardware.nvidia = {
+      # Modesetting is required.
+      modesetting.enable = true;
 
-    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    # Enable this if you have graphical corruption after suspend/wake.
-    powerManagement.enable = false;
+      # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+      # Enable this if you have graphical corruption after suspend/wake.
+      powerManagement.enable = false;
 
-    # Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    powerManagement.finegrained = true;
+      # Fine-grained power management. Turns off GPU when not in use.
+      # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+      powerManagement.finegrained = true;
 
-    # Use the NVidia open source kernel module (not to be confused with the
-    # independent third-party "nouveau" open source driver).
-    # Support is limited to the Turing and later architectures.
-    # We set to false here for maximum stability on the mobile 3050.
-    open = false;
+      # Use the NVidia open source kernel module (not to be confused with the
+      # independent third-party "nouveau" open source driver).
+      # Support is limited to the Turing and later architectures.
+      # We set to false here for maximum stability on the mobile 3050.
+      open = false;
 
-    # Enable the Nvidia settings menu,
-    # accessible via `nvidia-settings`.
-    nvidiaSettings = true;
+      # Enable the Nvidia settings menu,
+      # accessible via `nvidia-settings`.
+      nvidiaSettings = true;
 
-    # Select the stable driver version
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+      # Select the stable driver version
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
 
-    # PRIME CONFIGURATION (Hybrid Graphics)
-    prime = {
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
+      # PRIME CONFIGURATION (Hybrid Graphics)
+      prime = {
+        offload = {
+          enable = true;
+          enableOffloadCmd = true;
+        };
+
+        # Bus IDs derived from your lspci output
+        # NVIDIA: 01:00.0 -> PCI:1:0:0
+        # AMD: 04:00.0 -> PCI:4:0:0
+        nvidiaBusId = "PCI:1:0:0";
+        amdgpuBusId = "PCI:4:0:0";
       };
-      
-      # Bus IDs derived from your lspci output
-      # NVIDIA: 01:00.0 -> PCI:1:0:0
-      # AMD: 04:00.0 -> PCI:4:0:0
-      nvidiaBusId = "PCI:1:0:0";
-      amdgpuBusId = "PCI:4:0:0";
     };
-  };
-*/
+  */
 
-  system.stateVersion = "25.11"; 
+  system.stateVersion = "25.11";
 }
